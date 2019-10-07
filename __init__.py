@@ -113,82 +113,82 @@ class Useridentification(MycroftSkill):
 
 		self.signIn(numOfUsers + 1, name)
 
-	def voiceMatched(userId, wavFilePath):
-		#get files of user id
-		empty = True
-		lines = [["filename", "speaker"]]
-		for root, dirs, files in os.walk("/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers"):
-			for file in files:
-				if (userId in file.split('-')[0]):
-					lines.append([os.path.join(root, file), userId])
-					empty = False
-		if (empty == False):
-			with open ('/speakerIdentificationProgram/cfg/enroll_list.csv' , 'w') as writeFile:
-				writer = csv.writer(writeFile)
-				writer.writerows(lines)
+def voiceMatched(userId, wavFilePath):
+	#get files of user id
+	empty = True
+	lines = [["filename", "speaker"]]
+	for root, dirs, files in os.walk("/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers"):
+		for file in files:
+			if (userId in file.split('-')[0]):
+				lines.append([os.path.join(root, file), userId])
+				empty = False
+	if (empty == False):
+		with open ('/speakerIdentificationProgram/cfg/enroll_list.csv' , 'w') as writeFile:
+			writer = csv.writer(writeFile)
+			writer.writerows(lines)
 
-			lines = [["filename", "speaker"], [wavFilePath, 0]]
-			with open ('/speakerIdentificationProgram/cfg/test_list.csv' , 'w') as writeFile:
-				writer = csv.writer(writeFile)
-				writer.writerows(lines)
+		lines = [["filename", "speaker"], [wavFilePath, 0]]
+		with open ('/speakerIdentificationProgram/cfg/test_list.csv' , 'w') as writeFile:
+			writer = csv.writer(writeFile)
+			writer.writerows(lines)
 
-			execfile('speakerIdentificationProgram.scoring.py')
-			#get answer	
-			found = False
-			with open ('/speakerIdentificationProgram/res/results.csv' , 'r') as readFile:
-				writer = csv.writer(readFile)
-				lines = list(reader)
-			if (userID == lines[1][-2]):
-				found = True
-		
-			return found
-		return False
-	
+		execfile('speakerIdentificationProgram.scoring.py')
+		#get answer	
+		found = False
+		with open ('/speakerIdentificationProgram/res/results.csv' , 'r') as readFile:
+			writer = csv.writer(readFile)
+			lines = list(reader)
+		if (userID == lines[1][-2]):
+			found = True
 
-
-	def voiceFound(wavFilePath):
-		lines = [["filename", "speaker"]]
-		empty = True
-		for root, dirs, files in os.walk("/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers"):
-			for file in files:
-				if ("wav" in file):
-					lines.append([os.path.join(root, file), "0"])
-					empty = False
-		if (empty == False):
-			with open ('/speakerIdentificationProgram/cfg/enroll_list.csv' , 'w') as writeFile:
-				writer = csv.writer(writeFile)
-				writer.writerows(lines)
-
-			lines = [["filename", "speaker"], [wavFilePath, 0]]
-			with open ('/speakerIdentificationProgram/cfg/test_list.csv' , 'w') as writeFile:
-				writer = csv.writer(writeFile)
-				writer.writerows(lines)
-
-			execfile('speakerIdentificationProgram.scoring.py')
-
-			#get answer	
-			with open ('/speakerIdentificationProgram/res/results.csv' , 'r') as readFile:
-				writer = csv.writer(readFile)
-				lines = list(reader)
-			found = False
-			for num in lines[1]:
-				if ("E" not in num and "opt" not in num):
-					if (int(num) < 0.3):
-						found = True
-			return found
-		return False
+		return found
+	return False
 
 
 
-	def getCurrentUserAnswer():
-		#get current question sound file	
-		#/tmp/mycroft/mycroft_utterance(timestamp).wav
-		allWaveFilePaths = []	
-		for root, dirs, files in os.walk("/tmp/mycroft"):
-			for file in files:
-				if ("mycroft_utterance" in file):
-					allWaveFilePaths.append(file)
-		return allWaveFilePaths.sort()[0]
+def voiceFound(wavFilePath):
+	lines = [["filename", "speaker"]]
+	empty = True
+	for root, dirs, files in os.walk("/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers"):
+		for file in files:
+			if ("wav" in file):
+				lines.append([os.path.join(root, file), "0"])
+				empty = False
+	if (empty == False):
+		with open ('/speakerIdentificationProgram/cfg/enroll_list.csv' , 'w') as writeFile:
+			writer = csv.writer(writeFile)
+			writer.writerows(lines)
+
+		lines = [["filename", "speaker"], [wavFilePath, 0]]
+		with open ('/speakerIdentificationProgram/cfg/test_list.csv' , 'w') as writeFile:
+			writer = csv.writer(writeFile)
+			writer.writerows(lines)
+
+		execfile('speakerIdentificationProgram.scoring.py')
+
+		#get answer	
+		with open ('/speakerIdentificationProgram/res/results.csv' , 'r') as readFile:
+			writer = csv.writer(readFile)
+			lines = list(reader)
+		found = False
+		for num in lines[1]:
+			if ("E" not in num and "opt" not in num):
+				if (int(num) < 0.3):
+					found = True
+		return found
+	return False
+
+
+
+def getCurrentUserAnswer():
+	#get current question sound file	
+	#/tmp/mycroft/mycroft_utterance(timestamp).wav
+	allWaveFilePaths = []	
+	for root, dirs, files in os.walk("/tmp/mycroft"):
+		for file in files:
+			if ("mycroft_utterance" in file):
+				allWaveFilePaths.append(file)
+	return allWaveFilePaths.sort()[0]
 
 def create_skill():
 	return Useridentification()
