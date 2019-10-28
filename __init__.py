@@ -29,6 +29,7 @@ class Useridentification(MycroftSkill):
 		#explaining
 		#testing
 		#make current user
+		#save user data (username and password)
 		UsersFile = open("/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers/Users.txt", "r")
 		if not (os.stat("/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers/Users.txt").st_size == 0):
 			currentUser = UsersFile.readline().split(':')[1].split('-')[0][1:]
