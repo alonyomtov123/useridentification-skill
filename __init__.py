@@ -13,7 +13,7 @@ class Useridentification(MycroftSkill):
 		if self.voc_match(utt, 'useridentification.intent'):
 		# mock the standard message object to pass it to a standard intent handler
 			mock_message = {'data': {'utterance': utt}}
-			if(self.my_intent_handler(mock_message) == False):
+			if(self.handle_useridentification(mock_message) == False):
 				return False
 			return True
 		return False
