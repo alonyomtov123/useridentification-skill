@@ -30,8 +30,8 @@ class Useridentification(MycroftSkill):
 		#testing
 		#make current user
 		#save user data (username and password)
-		UsersFile = open("/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers/Users.txt", "r")
-		if not (os.stat("/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers/Users.txt").st_size == 0):
+		UsersFile = open("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt", "r")
+		if not (os.stat("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt").st_size == 0):
 			currentUser = UsersFile.readline().split(':')[1].split('-')[0][1:]
 	
 			currentUserAnswer = getCurrentUserAnswer()
@@ -74,15 +74,15 @@ class Useridentification(MycroftSkill):
 
 	def signIn(self, userId, name):
 		if(userId == ""):
-			UsersFile = open("/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers/Users.txt", "r")
-			if not (os.stat("/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers/Users.txt").st_size == 0):
+			UsersFile = open("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt", "r")
+			if not (os.stat("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt").st_size == 0):
 				Users.readline()
 				for user in UsersFile.readline():
 					if (voiceMatched(user.split('-')[0], getCurrentUserAnswer())):
 						userId = user.split('-')[0]
 						name = user.split('-')[1]
 
-		UsersFile = open("/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers/Users.txt", "r")
+		UsersFile = open("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt", "r")
 		UsersFile.write("Current User: " + userId + name)
 		#edit skill files
 
@@ -98,8 +98,8 @@ class Useridentification(MycroftSkill):
 			found = False
 			numOfUsers = 0		
 	
-			UsersFile = open("/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers/Users.txt", "r")
-			if not (os.stat("/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers/Users.txt").st_size == 0):
+			UsersFile = open("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt", "r")
+			if not (os.stat("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt").st_size == 0):
 				Users.readline()
 				for user in UsersFile.readline():
 					numOfUsers += 1
@@ -110,7 +110,7 @@ class Useridentification(MycroftSkill):
 						found = True
 						break
 	
-		dest = "/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers/" + (numOfUsers + 1) + "-" + name + "-1" + ".wav"
+		dest = "/opt/mycroft/skills/useridentification-skill/allUsers/" + (numOfUsers + 1) + "-" + name + "-1" + ".wav"
 		copyfile(getCurrentUserAnswer(), dest)
 
 		self.signIn(numOfUsers + 1, name)
@@ -119,7 +119,7 @@ def voiceMatched(userId, wavFilePath):
 	#get files of user id
 	empty = True
 	lines = [["filename", "speaker"]]
-	for root, dirs, files in os.walk("/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers"):
+	for root, dirs, files in os.walk("/opt/mycroft/skills/useridentification-skill/allUsers"):
 		for file in files:
 			if (userId in file.split('-')[0]):
 				lines.append([os.path.join(root, file), userId])
@@ -151,7 +151,7 @@ def voiceMatched(userId, wavFilePath):
 def voiceFound(wavFilePath):
 	lines = [["filename", "speaker"]]
 	empty = True
-	for root, dirs, files in os.walk("/opt/mycroft/skills/useridentification-skill.alonyomtov123/allUsers"):
+	for root, dirs, files in os.walk("/opt/mycroft/skills/useridentification-skill/allUsers"):
 		for file in files:
 			if ("wav" in file):
 				lines.append([os.path.join(root, file), "0"])
