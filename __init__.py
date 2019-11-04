@@ -3,7 +3,6 @@ import os
 from shutil import copyfile
 import csv
 import os
-import subprocess
 
 class Useridentification(MycroftSkill):
 	def __init__(self):
@@ -39,7 +38,7 @@ class Useridentification(MycroftSkill):
 				return False
 			else:
 				if (voiceFound(currentUserAnswer)):
-					answer = get_response("do.you.want.to.sign.in?")
+					answer = self.ask_yesno("do.you.want.to.sign.in?")
 					if (answer == "yes"):
 						self.signIn("")
 						return False
@@ -49,7 +48,7 @@ class Useridentification(MycroftSkill):
 						self.speak("Answer Is Invalid")
 						return True
 				else:
-					answer = get_response("do.you.want.to.sign.up?")
+					answer = self.get_response("do.you.want.to.sign.up?")
 					if (answer == "yes"):
 						self.signUp()
 						return False
@@ -152,14 +151,15 @@ def voiceMatched(userId, wavFilePath):
 		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/cfg/test_list.csv' , 'w') as writeFile:
 			writer = csv.writer(writeFile)
 			writer.writerows(lines)
+		
+		os.system("python /opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/scoring.py")
 
-		exec(open('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/scoring.py').read())
 		#get answer	
 		found = False
 		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/res/results.csv' , 'r') as readFile:
-			writer = csv.writer(readFile)
+			reader = csv.reader(readFile)
 			lines = list(reader)
-		if (userID == lines[1][-2]):
+		if (userId == lines[1][-2]):
 			found = True
 
 		return found
@@ -185,16 +185,17 @@ def voiceFound(wavFilePath):
 			writer = csv.writer(writeFile)
 			writer.writerows(lines)
 
-		exec(open('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/scoring.py').read())
+		os.system("python /opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/scoring.py")
 
-		#get answer	
-		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/res/results.csv' , 'r') as readFile:
-			writer = csv.writer(readFile)
-			lines = list(reader)
+		#get answer
 		found = False
-		for num in lines[1]:
-			if ("E" not in num and "opt" not in num):
-				if (int(num) < 0.3):
+		for line in open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/res/results.csv' , 'r'):
+			row = line.split()[2:-2]	
+		for num in row:
+			if ("opt" not in num):
+				if ("E" in num):
+					found = True				
+				if (float(num) < 0.3):
 					found = True
 		return found
 	return False
