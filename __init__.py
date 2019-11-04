@@ -3,6 +3,7 @@ import os
 from shutil import copyfile
 import csv
 import os
+import subprocess
 
 class Useridentification(MycroftSkill):
 	def __init__(self):
@@ -24,11 +25,9 @@ class Useridentification(MycroftSkill):
 	@intent_file_handler('useridentification.intent')
 	def handle_useridentification(self, message):
 		#add files from questions
-		#edit intents
 		#if first time
 		#explaining
 		#testing
-		#make current user
 		#save user data (username and password)
 		UsersFile = open("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt", "r")
 		if not (os.stat("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt").st_size == 0):
@@ -69,6 +68,7 @@ class Useridentification(MycroftSkill):
 			else:
 				self.speak("Answer Is Invalid")
 				return True
+		UsersFile.close()
 
 
 
@@ -81,10 +81,28 @@ class Useridentification(MycroftSkill):
 					if (voiceMatched(user.split('-')[0], getCurrentUserAnswer())):
 						userId = user.split('-')[0]
 						name = user.split('-')[1]
+			UsersFile.close()
 
-		UsersFile = open("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt", "r")
+		UsersFile = open("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt", "w")
 		UsersFile.write("Current User: " + userId + name)
-		#edit skill files
+		#settingsFile = open("/opt/mycroft/skills/useridentification-skill/settingFile.txt", "r")
+		#for directory in settingsFile.readline():
+			#find which file to change
+			#get password
+			#get username
+		#	currentSettingsFile = open(os.path.join(derectory + ), "w")
+		#	for line in currentSettingsFile.readline():
+		#		if ("Username" in line or "username" in line):
+		#			nextLine = currentSettingsFile.readline()
+		#			if("value" in nextLine):
+		#				currentSettingsFile.write('\t\tvalue: ""')
+		#		if ("Password" in line or "password" in line):
+		#			nextLine = currentSettingsFile.readline()
+		#			if("value" in nextLine):
+		#				currentSettingsFile.write('\t\tvalue: ""')
+		#	currentSettingsFile.close()
+		#settingsFile.close()
+		UsersFile.close()
 
 
 
@@ -109,6 +127,7 @@ class Useridentification(MycroftSkill):
 						name = get_response("Please.choose.a.name")
 						found = True
 						break
+			UsersFile.close()
 	
 		dest = "/opt/mycroft/skills/useridentification-skill/allUsers/" + (numOfUsers + 1) + "-" + name + "-1" + ".wav"
 		copyfile(getCurrentUserAnswer(), dest)
@@ -125,19 +144,19 @@ def voiceMatched(userId, wavFilePath):
 				lines.append([os.path.join(root, file), userId])
 				empty = False
 	if (empty == False):
-		with open ('/speakerIdentificationProgram/cfg/enroll_list.csv' , 'w') as writeFile:
+		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/cfg/enroll_list.csv' , 'w') as writeFile:
 			writer = csv.writer(writeFile)
 			writer.writerows(lines)
 
 		lines = [["filename", "speaker"], [wavFilePath, 0]]
-		with open ('/speakerIdentificationProgram/cfg/test_list.csv' , 'w') as writeFile:
+		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/cfg/test_list.csv' , 'w') as writeFile:
 			writer = csv.writer(writeFile)
 			writer.writerows(lines)
 
-		execfile('speakerIdentificationProgram.scoring.py')
+		exec(open('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/scoring.py').read())
 		#get answer	
 		found = False
-		with open ('/speakerIdentificationProgram/res/results.csv' , 'r') as readFile:
+		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/res/results.csv' , 'r') as readFile:
 			writer = csv.writer(readFile)
 			lines = list(reader)
 		if (userID == lines[1][-2]):
@@ -157,19 +176,19 @@ def voiceFound(wavFilePath):
 				lines.append([os.path.join(root, file), "0"])
 				empty = False
 	if (empty == False):
-		with open ('/speakerIdentificationProgram/cfg/enroll_list.csv' , 'w') as writeFile:
+		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/cfg/enroll_list.csv' , 'w') as writeFile:
 			writer = csv.writer(writeFile)
 			writer.writerows(lines)
 
 		lines = [["filename", "speaker"], [wavFilePath, 0]]
-		with open ('/speakerIdentificationProgram/cfg/test_list.csv' , 'w') as writeFile:
+		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/cfg/test_list.csv' , 'w') as writeFile:
 			writer = csv.writer(writeFile)
 			writer.writerows(lines)
 
-		execfile('speakerIdentificationProgram.scoring.py')
+		exec(open('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/scoring.py').read())
 
 		#get answer	
-		with open ('/speakerIdentificationProgram/res/results.csv' , 'r') as readFile:
+		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/res/results.csv' , 'r') as readFile:
 			writer = csv.writer(readFile)
 			lines = list(reader)
 		found = False
@@ -186,11 +205,11 @@ def getCurrentUserAnswer():
 	#get current question sound file	
 	#/tmp/mycroft/mycroft_utterance(timestamp).wav
 	allWaveFilePaths = []	
-	for root, dirs, files in os.walk("/tmp/mycroft"):
+	for root, dirs, files in os.walk("/tmp"):
 		for file in files:
-			if ("mycroft_utterance" in file):
+			if ("mycroft" in file and ".wav" in file):
 				allWaveFilePaths.append(file)
-	return allWaveFilePaths.sort()[0]
+	return sorted(allWaveFilePaths)[0]
 
 def create_skill():
 	return Useridentification()
