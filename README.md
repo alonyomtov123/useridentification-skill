@@ -16,3 +16,7 @@ alonyomtov123@gmail.com
 
 ## Tags
 
+##To DO
+run: chmod +x __init__.py
+run: skillSetup.py
+check all pip
