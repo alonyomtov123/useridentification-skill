@@ -3,6 +3,7 @@ import os
 from shutil import copyfile
 import csv
 import os
+import sqlite3
 
 class Useridentification(MycroftSkill):
 	def __init__(self):
@@ -27,11 +28,15 @@ class Useridentification(MycroftSkill):
 		#if first time
 		#explaining
 		#testing
-		#get username and password in signUp
-		#change file to sql
-		UsersFile = open("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt", "r")
-		if not (os.stat("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt").st_size == 0):
-			currentUser = UsersFile.readline().split(':')[1].split('-')[0][1:]
+
+		conn = sqlite3.connect('/allUsers/Users.db')
+		c = conn.cursor()		
+		c.execute("SELECT * FROM User"):
+
+		if not (c.fetchone() == None):
+			for row in c.execute("SELECT * FROM User"):
+				if (row[3] == '1'):
+					currentUser = row[0]
 	
 			currentUserAnswer = getCurrentUserAnswer()
 		
@@ -68,71 +73,80 @@ class Useridentification(MycroftSkill):
 			else:
 				self.speak("Answer Is Invalid")
 				return True
-		UsersFile.close()
+		conn.close()
 
 
 
-	def signIn(self, userId, name):
+	def signIn(self, userId):
+		conn = sqlite3.connect('/allUsers/Users.db')
+		c = conn.cursor()	
 		if(userId == ""):
-			UsersFile = open("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt", "r")
-			if not (os.stat("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt").st_size == 0):
-				Users.readline()
-				for user in UsersFile.readline():
-					if (voiceMatched(user.split('-')[0], getCurrentUserAnswer())):
-						userId = user.split('-')[0]
-						name = user.split('-')[1]
-			UsersFile.close()
+			c.execute("SELECT * FROM User"):
+			if not (c.fetchone() == None):
+				for row in c.execute("SELECT * FROM User"):
+					if (voiceMatched(row[1], getCurrentUserAnswer()):
+						userId = row[0]
+						username = row[1]
+						password = row[2]
+		else:
+			for row in c.execute("SELECT * FROM User"):
+				if (row[0] == userId):
+					username = row[1]
+					password = row[2]
+	
+		c.execute("UPDATE User SET CurrentUser = 0 WHERE CurrentUser = 1")
+		c.execute("UPDATE User SET CurrentUser = 1 WHERE ID = " + userId)
+		conn.commit()
 
-		UsersFile = open("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt", "w")
-		UsersFile.write("Current User: " + userId + name)
-		#settingsFile = open("/opt/mycroft/skills/useridentification-skill/settingFile.txt", "r")
-		#for directory in settingsFile.readline():
+		settingsFile = open("/opt/mycroft/skills/useridentification-skill/settingFile.txt", "r")
+		for directory in settingsFile.readline():
 			#find which file to change
-			#get password
-			#get username
-		#	currentSettingsFile = open(os.path.join(derectory + ), "w")
-		#	for line in currentSettingsFile.readline():
-		#		if ("Username" in line or "username" in line):
-		#			nextLine = currentSettingsFile.readline()
-		#			if("value" in nextLine):
-		#				currentSettingsFile.write('\t\tvalue: ""')
-		#		if ("Password" in line or "password" in line):
-		#			nextLine = currentSettingsFile.readline()
-		#			if("value" in nextLine):
-		#				currentSettingsFile.write('\t\tvalue: ""')
-		#	currentSettingsFile.close()
-		#settingsFile.close()
-		UsersFile.close()
+			currentSettingsFile = open(os.path.join(directory + ), "w") #add something
+			for line in currentSettingsFile.readline():
+				if ("Username" in line or "username" in line):
+					nextLine = currentSettingsFile.readline()
+					if("value" in nextLine):
+						currentSettingsFile.write("\t\tvalue: " + username)
+				if ("Password" in line or "password" in line):
+					nextLine = currentSettingsFile.readline()
+					if("value" in nextLine):
+						currentSettingsFile.write("\t\tvalue: " + password)
+			currentSettingsFile.close()
+		settingsFile.close()
+		conn.close()
 
 
 
 	def signUp(self):
 		audioFile = getCurrentUserAnswer()
-	
-		name = get_response("Please.choose.a.name")
+		conn = sqlite3.connect('/allUsers/Users.db')
+		c = conn.cursor()
+
+		username = get_response("Please.choose.a.name")
 		found = True
 		numOfUsers = 0
 		while (found == True):
 			found = False
 			numOfUsers = 0		
 	
-			UsersFile = open("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt", "r")
-			if not (os.stat("/opt/mycroft/skills/useridentification-skill/allUsers/Users.txt").st_size == 0):
-				Users.readline()
-				for user in UsersFile.readline():
+			c.execute("SELECT * FROM User"):
+			if not (c.fetchone() == None):
+				for row in c.execute("SELECT * FROM User"):
 					numOfUsers += 1
-					if (user.split('-')[1] == name):
+					if (row[1] == username):
 						found = True
 						self.speak("User.name.is.already.used")
-						name = get_response("Please.choose.a.name")
+						username = get_response("Please.choose.a.name")
 						found = True
 						break
-			UsersFile.close()
-	
+		#get username and password (letter by letter)
+		c.execute("INSERT INTO User VALUES (?, ?, ?, ?)", (numOfUsers + 1, username, password, 0))
+		conn.commit()
 		dest = "/opt/mycroft/skills/useridentification-skill/allUsers/" + (numOfUsers + 1) + "-" + name + "-1" + ".wav"
 		copyfile(getCurrentUserAnswer(), dest)
-
-		self.signIn(numOfUsers + 1, name)
+		
+		self.signIn(numOfUsers + 1)
+		conn.close()
 
 def voiceMatched(userId, wavFilePath):
 	#get files of user id

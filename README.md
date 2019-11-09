@@ -17,6 +17,7 @@ alonyomtov123@gmail.com
 ## Tags
 
 ##To DO
+check that file name is useridentification-skill
 run: chmod +x __init__.py
 run: skillSetup.py
 check all pip

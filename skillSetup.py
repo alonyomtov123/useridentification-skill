@@ -1,6 +1,7 @@
 import os
-
-def main():	
+#change so you save the audio files
+def main():
+	settingsFile = open("/opt/mycroft/skills/useridentification-skill/settingFile.txt", "w+")
 	myIntentFile = open("vocab/en-us/useridentification.intent", "w+")
 	#find all skills
 	for root, dirs, files in os.walk("/opt/mycroft/skills"):
@@ -8,8 +9,9 @@ def main():
 			#find all specific skills
 			if("settingsmeta.yaml" == file or "settingsmeta.json" == file):
 				currentFile = open(os.path.join(root, file), "r")
-				if("email" in currentFile.read()):
+				if("password" in currentFile.read()):
 					#find all the intents (triggers) of specific skill
+					settingsFile.write(root + "\n")
 					for secondRoot, secondDirs, secondFiles in os.walk(root):
 						for allCurrentFiles in secondFiles:
 							if ("intent" in allCurrentFiles):
@@ -22,6 +24,7 @@ def main():
 								intentFile.close()
 
 	myIntentFile.close()
+	settingsFile.close()
 
 if __name__ == "__main__":
 	main()
