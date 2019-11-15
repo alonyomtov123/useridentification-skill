@@ -11,7 +11,7 @@ def main():
 				currentFile = open(os.path.join(root, file), "r")
 				if("password" in currentFile.read()):
 					#find all the intents (triggers) of specific skill
-					settingsFile.write(root + "\n")
+					settingsFile.write(root + "/" + file + "\n")
 					for secondRoot, secondDirs, secondFiles in os.walk(root):
 						for allCurrentFiles in secondFiles:
 							if ("intent" in allCurrentFiles):
