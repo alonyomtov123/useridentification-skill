@@ -29,7 +29,7 @@ class Useridentification(MycroftSkill):
 		#explaining
 		#testing
 
-		conn = sqlite3.connect('/allUsers/Users.db')
+		conn = sqlite3.connect('allUsers/Users.db')
 		c = conn.cursor()		
 		c.execute("SELECT * FROM User"):
 
@@ -78,7 +78,7 @@ class Useridentification(MycroftSkill):
 
 
 	def signIn(self, userId):
-		conn = sqlite3.connect('/allUsers/Users.db')
+		conn = sqlite3.connect('allUsers/Users.db')
 		c = conn.cursor()	
 		if(userId == ""):
 			c.execute("SELECT * FROM User"):
@@ -101,7 +101,7 @@ class Useridentification(MycroftSkill):
 		settingsFile = open("/opt/mycroft/skills/useridentification-skill/settingFile.txt", "r")
 		for directory in settingsFile.readline():
 			#find which file to change
-			currentSettingsFile = open(os.path.join(directory + ), "w") #add something
+			currentSettingsFile = open(os.path.join(directory), "w")
 			for line in currentSettingsFile.readline():
 				if ("Username" in line or "username" in line):
 					nextLine = currentSettingsFile.readline()
@@ -119,7 +119,7 @@ class Useridentification(MycroftSkill):
 
 	def signUp(self):
 		audioFile = getCurrentUserAnswer()
-		conn = sqlite3.connect('/allUsers/Users.db')
+		conn = sqlite3.connect('allUsers/Users.db')
 		c = conn.cursor()
 
 		username = get_response("Please.choose.a.name")
