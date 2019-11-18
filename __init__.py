@@ -25,19 +25,20 @@ class Useridentification(MycroftSkill):
 	@intent_file_handler('useridentification.intent')
 	def handle_useridentification(self, message):
 		#add files from questions
-		#if first time
 		#explaining
 		#testing
 
-		conn = sqlite3.connect('allUsers/Users.db')
+		conn = sqlite3.connect('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
 		c = conn.cursor()		
-		c.execute("SELECT * FROM User"):
+		c.execute("SELECT * FROM User")
 
 		if not (c.fetchone() == None):
+			currentUser = ""
 			for row in c.execute("SELECT * FROM User"):
+				self.speak(row[0])
 				if (row[3] == '1'):
 					currentUser = row[0]
-	
+			self.speak(currentUser)
 			currentUserAnswer = getCurrentUserAnswer()
 		
 			if (voiceMatched(currentUser, currentUserAnswer)):
@@ -78,13 +79,13 @@ class Useridentification(MycroftSkill):
 
 
 	def signIn(self, userId):
-		conn = sqlite3.connect('allUsers/Users.db')
+		conn = sqlite3.connect('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
 		c = conn.cursor()	
 		if(userId == ""):
-			c.execute("SELECT * FROM User"):
+			c.execute("SELECT * FROM User")
 			if not (c.fetchone() == None):
 				for row in c.execute("SELECT * FROM User"):
-					if (voiceMatched(row[1], getCurrentUserAnswer()):
+					if (voiceMatched(row[1], getCurrentUserAnswer())):
 						userId = row[0]
 						username = row[1]
 						password = row[2]
@@ -119,7 +120,7 @@ class Useridentification(MycroftSkill):
 
 	def signUp(self):
 		audioFile = getCurrentUserAnswer()
-		conn = sqlite3.connect('allUsers/Users.db')
+		conn = sqlite3.connect('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
 		c = conn.cursor()
 
 		username = get_response("Please.choose.a.name")
@@ -129,7 +130,7 @@ class Useridentification(MycroftSkill):
 			found = False
 			numOfUsers = 0		
 	
-			c.execute("SELECT * FROM User"):
+			c.execute("SELECT * FROM User")
 			if not (c.fetchone() == None):
 				for row in c.execute("SELECT * FROM User"):
 					numOfUsers += 1
