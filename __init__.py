@@ -65,7 +65,7 @@ class Useridentification(MycroftSkill):
 						self.speak("Answer Is Invalid")
 						return True
 		else:
-			answer = get_response("do.you.want.to.sign.up?")
+			answer = self.get_response("do.you.want.to.sign.up?")
 			if (answer == "yes"):
 				self.signUp(self)
 				return False
