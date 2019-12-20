@@ -123,7 +123,7 @@ class Useridentification(MycroftSkill):
 		conn = sqlite3.connect('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
 		c = conn.cursor()
 
-		username = get_response("Please.choose.a.name")
+		username = self.get_response("Please.choose.a.name")
 		found = True
 		numOfUsers = 0
 		while (found == True):
@@ -137,7 +137,7 @@ class Useridentification(MycroftSkill):
 					if (row[1] == username):
 						found = True
 						self.speak("User.name.is.already.used")
-						username = get_response("Please.choose.a.name")
+						username = self.get_response("Please.choose.a.name")
 						found = True
 						break
 		#get username and password (letter by letter)
