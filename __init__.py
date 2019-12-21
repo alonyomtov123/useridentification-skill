@@ -9,7 +9,7 @@ class Useridentification(MycroftSkill):
 	def __init__(self):
 	        MycroftSkill.__init__(self)
 	
-	def converse(self, utterances):
+	def converse(self, utterances, lang):
 		utt = utterances[0]
 		if self.voc_match(utt, 'useridentification.intent'):
 		# mock the standard message object to pass it to a standard intent handler
