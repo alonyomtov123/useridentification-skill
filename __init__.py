@@ -4,12 +4,14 @@ from shutil import copyfile
 import csv
 import os
 import sqlite3
-
+import sys
+sys.path.append("/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram")
+from scoring import get_id_result
 class Useridentification(MycroftSkill):
 	def __init__(self):
 	        MycroftSkill.__init__(self)
 	
-	def converse(self, utterances, lang):
+	def converse(self, utterances):
 		utt = utterances[0]
 		if self.voc_match(utt, 'useridentification.intent'):
 		# mock the standard message object to pass it to a standard intent handler
@@ -62,6 +64,7 @@ class Useridentification(MycroftSkill):
 					elif (answer == "no"):
 						return True
 					else:
+						self.speak(answer)
 						self.speak("Answer Is Invalid")
 						return True
 		else:
@@ -72,6 +75,7 @@ class Useridentification(MycroftSkill):
 			elif (answer == "no"):
 				return True
 			else:
+				self.speak(answer)
 				self.speak("Answer Is Invalid")
 				return True
 		conn.close()
@@ -123,7 +127,7 @@ class Useridentification(MycroftSkill):
 		conn = sqlite3.connect('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
 		c = conn.cursor()
 
-		username = self.get_response("Please.choose.a.name")
+		name = self.get_response("Please.choose.a.name")
 		found = True
 		numOfUsers = 0
 		while (found == True):
@@ -134,13 +138,28 @@ class Useridentification(MycroftSkill):
 			if not (c.fetchone() == None):
 				for row in c.execute("SELECT * FROM User"):
 					numOfUsers += 1
-					if (row[1] == username):
+					if (row[1] == name):
 						found = True
-						self.speak("User.name.is.already.used")
-						username = self.get_response("Please.choose.a.name")
+						self.speak("name is already used")
+						name = self.get_response("Please choose a name")
 						found = True
 						break
-		#get username and password (letter by letter)
+
+		
+		self.speak("Please enter the username letter by letter")
+		letter = self.get_response("When you finish say done")
+		while (letter != "done" or letter != "Done"):
+			username += letter
+			letter = self.get_response("Enter next letter")
+			
+		self.speak("Please enter the password letter by letter")
+		letter = self.get_response("When you finish say done")
+		while (letter != "done" or letter != "Done"):
+			username += letter
+			letter = self.get_response("Enter next letter")
+
+		#check username
+		#ask change
 		c.execute("INSERT INTO User VALUES (?, ?, ?, ?)", (numOfUsers + 1, username, password, 0))
 		conn.commit()
 		dest = "/opt/mycroft/skills/useridentification-skill/allUsers/" + (numOfUsers + 1) + "-" + name + "-1" + ".wav"
@@ -168,8 +187,8 @@ def voiceMatched(userId, wavFilePath):
 			writer = csv.writer(writeFile)
 			writer.writerows(lines)
 		
-		os.system("python /opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/scoring.py")
-
+		#os.system("python /opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/scoring.py")
+		get_id_result()
 		#get answer	
 		found = False
 		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/res/results.csv' , 'r') as readFile:
@@ -201,7 +220,8 @@ def voiceFound(wavFilePath):
 			writer = csv.writer(writeFile)
 			writer.writerows(lines)
 
-		os.system("python /opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/scoring.py")
+		#os.system("python /opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/scoring.py")
+		get_id_result()
 
 		#get answer
 		found = False
