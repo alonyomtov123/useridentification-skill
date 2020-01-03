@@ -155,7 +155,7 @@ class Useridentification(MycroftSkill):
 		self.speak("Please enter the password letter by letter")
 		letter = self.get_response("When you finish say done")
 		while (letter != "done" or letter != "Done"):
-			username += letter
+			password += letter
 			letter = self.get_response("Enter next letter")
 
 		#check username
