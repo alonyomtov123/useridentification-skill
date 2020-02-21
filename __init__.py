@@ -47,15 +47,8 @@ class Useridentification(MycroftSkill):
 				return False
 			else:
 				if (voiceFound(currentUserAnswer)):
-					answer = self.ask_yesno("do.you.want.to.sign.in?")
-					if (answer == "yes"):
-						self.signIn("")
-						return False
-					elif (answer == "no"):
-						return True
-					else:
-						self.speak("Answer Is Invalid")
-						return True
+					self.signIn("")
+					return False
 				else:
 					answer = self.get_response("do.you.want.to.sign.up?")
 					if (answer == "yes"):
