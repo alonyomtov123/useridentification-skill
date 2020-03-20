@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 import sqlite3
-def getUserData():
+def getUserData(dbPath):
     sg.theme('DarkAmber')	# Add a touch of color
     # All the stuff inside your window.
     layout = [  [sg.Text('')],
@@ -18,7 +18,7 @@ def getUserData():
             sg.Popup('Username is invalid')
             continue
         else:
-            conn = sqlite3.connect('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
+            conn = sqlite3.connect(dbPath)
             c = conn.cursor()
             c.execute("SELECT COUNT(*) FROM User")
             number_of_entries = c.fetchone()[0]
@@ -37,7 +37,7 @@ def getUserData():
                 c.execute("INSERT INTO User VALUES (?, ?, ?, ?)", (number_of_entries + 1, values[0], values[1], 0))
                 conn.commit()
                 break
+			conn.close()
     window.close()
-    
-
-getUserData()
+	dest = "/opt/mycroft/skills/useridentification-skill/allUsers/" + (number_of_entries + 1) + "-" + values[0] + "-1" + ".wav"
+	copyfile(getCurrentUserAnswer(), dest)
