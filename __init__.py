@@ -5,8 +5,11 @@ import csv
 import os
 import sqlite3
 import sys
+
 sys.path.append("/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram")
 from scoring import get_id_result
+from sql_gui import getUserData
+
 class Useridentification(MycroftSkill):
 	def __init__(self):
 	        MycroftSkill.__init__(self)
@@ -117,49 +120,8 @@ class Useridentification(MycroftSkill):
 
 	def signUp(self):
 		audioFile = getCurrentUserAnswer()
-		conn = sqlite3.connect('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
-		c = conn.cursor()
-
-		name = self.get_response("Please.choose.a.name")
-		found = True
-		numOfUsers = 0
-		while (found == True):
-			found = False
-			numOfUsers = 0		
-	
-			c.execute("SELECT * FROM User")
-			if not (c.fetchone() == None):
-				for row in c.execute("SELECT * FROM User"):
-					numOfUsers += 1
-					if (row[1] == name):
-						found = True
-						self.speak("name is already used")
-						name = self.get_response("Please choose a name")
-						found = True
-						break
-
-		
-		self.speak("Please enter the username letter by letter")
-		letter = self.get_response("When you finish say done")
-		while (letter != "done" or letter != "Done"):
-			username += letter
-			letter = self.get_response("Enter next letter")
-			
-		self.speak("Please enter the password letter by letter")
-		letter = self.get_response("When you finish say done")
-		while (letter != "done" or letter != "Done"):
-			password += letter
-			letter = self.get_response("Enter next letter")
-
-		#check username
-		#ask change
-		c.execute("INSERT INTO User VALUES (?, ?, ?, ?)", (numOfUsers + 1, username, password, 0))
-		conn.commit()
-		dest = "/opt/mycroft/skills/useridentification-skill/allUsers/" + (numOfUsers + 1) + "-" + name + "-1" + ".wav"
-		copyfile(getCurrentUserAnswer(), dest)
-		
+		getUserData('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
 		self.signIn(numOfUsers + 1)
-		conn.close()
 
 def voiceMatched(userId, wavFilePath):
 	#get files of user id
@@ -180,7 +142,6 @@ def voiceMatched(userId, wavFilePath):
 			writer = csv.writer(writeFile)
 			writer.writerows(lines)
 		
-		#os.system("python /opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/scoring.py")
 		get_id_result()
 		#get answer	
 		found = False
