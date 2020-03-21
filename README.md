@@ -21,3 +21,9 @@ check that file name is useridentification-skill
 run: chmod +x __init__.py
 run: skillSetup.py
 check all pip
+
+run:
+mycroft-pip install tensorflow
+mycroft-pip install pandas
+mycroft-pip install numpy
+mycroft-pip install keras
