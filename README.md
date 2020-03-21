@@ -27,3 +27,4 @@ mycroft-pip install tensorflow
 mycroft-pip install pandas
 mycroft-pip install numpy
 mycroft-pip install keras
+mycroft-pip install librosa
