@@ -20,7 +20,8 @@ alonyomtov123@gmail.com
 check that file name is useridentification-skill
 run: chmod +x __init__.py
 run: skillSetup.py
-check all pip
+Add less secure app access
+
 
 run:
 mycroft-pip install tensorflow
