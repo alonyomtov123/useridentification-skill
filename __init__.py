@@ -6,9 +6,11 @@ import os
 import sqlite3
 import sys
 
+#from sqlGui import getUserData
+
 sys.path.append("/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram")
 from scoring import get_id_result
-from sql_gui import getUserData
+
 
 class Useridentification(MycroftSkill):
 	def __init__(self):
@@ -64,15 +66,17 @@ class Useridentification(MycroftSkill):
 						self.speak("Answer Is Invalid")
 						return True
 		else:
+			self.speak("No User is Currently registered")
 			answer = self.get_response("do.you.want.to.sign.up?")
 			if (answer == "yes"):
-				self.signUp(self)
+				self.signUp()
 				return False
 			elif (answer == "no"):
+				self.speak("Goodbye")
 				return True
 			else:
 				self.speak(answer)
-				self.speak("Answer Is Invalid")
+				self.speak("Answer Is Invalid.")
 				return True
 		conn.close()
 
@@ -161,7 +165,7 @@ def voiceFound(wavFilePath):
 	empty = True
 	for root, dirs, files in os.walk("/opt/mycroft/skills/useridentification-skill/allUsers"):
 		for file in files:
-			if ("wav" in file):
+			if (".wav" in file):
 				lines.append([os.path.join(root, file), "0"])
 				empty = False
 	if (empty == False):
@@ -174,7 +178,6 @@ def voiceFound(wavFilePath):
 			writer = csv.writer(writeFile)
 			writer.writerows(lines)
 
-		#os.system("python /opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/scoring.py")
 		get_id_result()
 
 		#get answer
@@ -194,12 +197,11 @@ def voiceFound(wavFilePath):
 
 def getCurrentUserAnswer():
 	#get current question sound file	
-	#/tmp/mycroft/mycroft_utterance(timestamp).wav
+	#/tmp/mycroft_utterance(timestamp).wav
 	allWaveFilePaths = []	
-	for root, dirs, files in os.walk("/tmp"):
+	for root, dirs, files in os.walk("/tmp/mycroft_utterances"):
 		for file in files:
-			if ("mycroft" in file and ".wav" in file):
-				allWaveFilePaths.append(file)
+			allWaveFilePaths.append(file)
 	return sorted(allWaveFilePaths)[0]
 
 def create_skill():
