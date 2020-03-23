@@ -17,10 +17,14 @@ alonyomtov123@gmail.com
 ## Tags
 
 ##To DO
+
 check that file name is useridentification-skill
+
 run: skillSetup.py
+
 Add less secure app access to your email account
-Edit "save_utterances" to True in mycroft.conf file
+
+Edit "save_utterances" to true (not True) in mycroft.conf file
 
 
 run:
