@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 import sqlite3
+
 def getUserData(dbPath):
     sg.theme('DarkAmber')	# Add a touch of color
     # All the stuff inside your window.
@@ -13,7 +14,6 @@ def getUserData(dbPath):
     # Event Loop to process "events" and get the "values" of the inputs
     while True:
         event, values = window.read()
-        print('You entered ', values)
         if("@" not in values[0] or "." not in values[0] or len(values[0]) == 0 or len(values[1]) == 0):
             sg.Popup('Username is invalid')
             continue
