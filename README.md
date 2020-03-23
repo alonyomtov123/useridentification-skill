@@ -24,8 +24,7 @@ run: skillSetup.py
 
 Add less secure app access to your email account
 
-Edit "save_utterances" to true (not True) in mycroft.conf file
-
+mycroft-config set listener.save_utterances true
 
 run:
 
