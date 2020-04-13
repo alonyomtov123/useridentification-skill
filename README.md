@@ -37,3 +37,5 @@ mycroft-pip install numpy
 mycroft-pip install keras
 
 mycroft-pip install librosa
+
+mycroft-pip install PySimpleGUI
