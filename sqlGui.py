@@ -1,5 +1,7 @@
 import PySimpleGUI as sg
 import sqlite3
+import os
+from shutil import copyfile
 
 def getUserData(dbPath):
     sg.theme('DarkAmber')	# Add a touch of color
@@ -37,7 +39,16 @@ def getUserData(dbPath):
                 c.execute("INSERT INTO User VALUES (?, ?, ?, ?)", (number_of_entries + 1, values[0], values[1], 0))
                 conn.commit()
                 break
-			conn.close()
+            conn.close()
     window.close()
-	dest = "/opt/mycroft/skills/useridentification-skill/allUsers/" + (number_of_entries + 1) + "-" + values[0] + "-1" + ".wav"
-	copyfile(getCurrentUserAnswer(), dest)
+    dest = "/opt/mycroft/skills/useridentification-skill/allUsers/" + str(number_of_entries + 1) + "-" + values[0] + "-1" + ".wav"
+    copyfile(getCurrentUserAnswer(), dest)
+
+def getCurrentUserAnswer():
+	#get current question sound file	
+	#/tmp/mycroft_utterance(timestamp).wav
+	allWaveFilePaths = []	
+	for root, dirs, files in os.walk("/tmp/mycroft_utterances"):
+		for file in files:
+			allWaveFilePaths.append(file)
+	return sorted(allWaveFilePaths)[0]
