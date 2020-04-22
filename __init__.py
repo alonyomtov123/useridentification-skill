@@ -1,15 +1,14 @@
 from mycroft import MycroftSkill, intent_file_handler
 import os
 from shutil import copyfile
-import csv
 import os
 import sqlite3
 import sys
 
-#from sqlGui import getUserData
+sys.path.append("/opt/mycroft/skills/useridentification-skill")
+from sqlGui import getUserData
+from voiceRecognition import voiceFound, voiceMatched
 
-sys.path.append("/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram")
-from scoring import get_id_result
 
 
 class Useridentification(MycroftSkill):
@@ -55,7 +54,7 @@ class Useridentification(MycroftSkill):
 					self.signIn("")
 					return False
 				else:
-					answer = self.get_response("do.you.want.to.sign.up?")
+					answer = self.get_response("Do you want to sign up?")
 					if (answer == "yes"):
 						self.signUp()
 						return False
@@ -63,11 +62,11 @@ class Useridentification(MycroftSkill):
 						return True
 					else:
 						self.speak(answer)
-						self.speak("Answer Is Invalid")
+						self.speak("Answer is invalid")
 						return True
 		else:
-			self.speak("No User is Currently registered")
-			answer = self.get_response("do.you.want.to.sign.up?")
+			self.speak("No user is currently registered")
+			answer = self.get_response("Do you want to sign up?")
 			if (answer == "yes"):
 				self.signUp()
 				return False
@@ -76,7 +75,7 @@ class Useridentification(MycroftSkill):
 				return True
 			else:
 				self.speak(answer)
-				self.speak("Answer Is Invalid.")
+				self.speak("Answer is invalid.")
 				return True
 		conn.close()
 
@@ -126,73 +125,6 @@ class Useridentification(MycroftSkill):
 		audioFile = getCurrentUserAnswer()
 		getUserData('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
 		self.signIn(numOfUsers + 1)
-
-def voiceMatched(userId, wavFilePath):
-	#get files of user id
-	empty = True
-	lines = [["filename", "speaker"]]
-	for root, dirs, files in os.walk("/opt/mycroft/skills/useridentification-skill/allUsers"):
-		for file in files:
-			if (userId in file.split('-')[0]):
-				lines.append([os.path.join(root, file), userId])
-				empty = False
-	if (empty == False):
-		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/cfg/enroll_list.csv' , 'w') as writeFile:
-			writer = csv.writer(writeFile)
-			writer.writerows(lines)
-
-		lines = [["filename", "speaker"], [wavFilePath, 0]]
-		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/cfg/test_list.csv' , 'w') as writeFile:
-			writer = csv.writer(writeFile)
-			writer.writerows(lines)
-		
-		get_id_result()
-		#get answer	
-		found = False
-		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/res/results.csv' , 'r') as readFile:
-			reader = csv.reader(readFile)
-			lines = list(reader)
-		if (userId == lines[1][-2]):
-			found = True
-
-		return found
-	return False
-
-
-
-def voiceFound(wavFilePath):
-	lines = [["filename", "speaker"]]
-	empty = True
-	for root, dirs, files in os.walk("/opt/mycroft/skills/useridentification-skill/allUsers"):
-		for file in files:
-			if (".wav" in file):
-				lines.append([os.path.join(root, file), "0"])
-				empty = False
-	if (empty == False):
-		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/cfg/enroll_list.csv' , 'w') as writeFile:
-			writer = csv.writer(writeFile)
-			writer.writerows(lines)
-
-		lines = [["filename", "speaker"], [wavFilePath, 0]]
-		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/cfg/test_list.csv' , 'w') as writeFile:
-			writer = csv.writer(writeFile)
-			writer.writerows(lines)
-
-		get_id_result()
-
-		#get answer
-		found = False
-		for line in open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/res/results.csv' , 'r'):
-			row = line.split()[2:-2]	
-		for num in row:
-			if ("opt" not in num):
-				if ("E" in num):
-					found = True				
-				if (float(num) < 0.3):
-					found = True
-		return found
-	return False
-
 
 
 def getCurrentUserAnswer():
