@@ -34,6 +34,7 @@ class Useridentification(MycroftSkill):
 		#explaining
 		#testing
 
+		#connect to database
 		conn = sqlite3.connect('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
 		c = conn.cursor()		
 		c.execute("SELECT * FROM User")
@@ -97,7 +98,8 @@ class Useridentification(MycroftSkill):
 				if (row[0] == userId):
 					username = row[1]
 					password = row[2]
-	
+
+		#set current user in database
 		c.execute("UPDATE User SET CurrentUser = 0 WHERE CurrentUser = 1")
 		c.execute("UPDATE User SET CurrentUser = 1 WHERE ID = " + userId)
 		conn.commit()
