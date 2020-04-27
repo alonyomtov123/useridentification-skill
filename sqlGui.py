@@ -4,8 +4,9 @@ import os
 from shutil import copyfile
 
 def getUserData(dbPath):
-    sg.theme('DarkAmber')	# Add a touch of color
-    # All the stuff inside your window.
+    sg.theme('DarkAmber') #color
+    
+    #window layout
     layout = [  [sg.Text('')],
                 [sg.Text('Enter Username: '), sg.InputText()],
                 [sg.Text('Enter Password:  '), sg.InputText()],
@@ -13,9 +14,11 @@ def getUserData(dbPath):
 
     # Create the Window
     window = sg.Window('Sign Up', layout)
+    
     # Event Loop to process "events" and get the "values" of the inputs
     while True:
         event, values = window.read()
+        #values are inputs from user
         if("@" not in values[0] or "." not in values[0] or len(values[0]) == 0 or len(values[1]) == 0):
             sg.Popup('Username is invalid')
             continue
@@ -24,17 +27,21 @@ def getUserData(dbPath):
             c = conn.cursor()
             c.execute("SELECT COUNT(*) FROM User")
             number_of_entries = c.fetchone()[0]
+
+            #check if username is not used.
             if number_of_entries != 0:
                 c = conn.cursor()
                 c.execute("SELECT userId FROM User WHERE userId=" + values[0])
                 if not c.fetchall():
                     sg.Popup('Username is already used')
                 else:
+                    #add user
                     c = conn.cursor()
                     c.execute("INSERT INTO User VALUES (?, ?, ?, ?)", (number_of_entries + 1, values[0], values[1], 0))
                     conn.commit()
                     break
             else:
+                #add user
                 c = conn.cursor()
                 c.execute("INSERT INTO User VALUES (?, ?, ?, ?)", (number_of_entries + 1, values[0], values[1], 0))
                 conn.commit()
