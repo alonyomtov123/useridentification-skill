@@ -16,17 +16,22 @@ def voiceMatched(userId, wavFilePath):
 				lines.append([os.path.join(root, file), userId])
 				empty = False
 	if (empty == False):
+		#add the path of the user to check
 		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/cfg/enroll_list.csv' , 'w') as writeFile:
 			writer = csv.writer(writeFile)
 			writer.writerows(lines)
 
+		#add current path file to check
 		lines = [["filename", "speaker"], [wavFilePath, 0]]
 		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/cfg/test_list.csv' , 'w') as writeFile:
 			writer = csv.writer(writeFile)
 			writer.writerows(lines)
 		
+
+		#run the voice identification
 		get_id_result()
-		#get answer	
+
+		#get answers from results.csv
 		found = False
 		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/res/results.csv' , 'r') as readFile:
 			reader = csv.reader(readFile)
@@ -48,18 +53,21 @@ def voiceFound(wavFilePath):
 				lines.append([os.path.join(root, file), "0"])
 				empty = False
 	if (empty == False):
+		#add all the voices to check
 		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/cfg/enroll_list.csv' , 'w') as writeFile:
 			writer = csv.writer(writeFile)
 			writer.writerows(lines)
 
+		#add current path file to check
 		lines = [["filename", "speaker"], [wavFilePath, 0]]
 		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/cfg/test_list.csv' , 'w') as writeFile:
 			writer = csv.writer(writeFile)
 			writer.writerows(lines)
 
+		#run the voice identification
 		get_id_result()
 
-		#get answer
+		#get answers from results.csv
 		found = False
 		for line in open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/res/results.csv' , 'r'):
 			row = line.split()[2:-2]	
