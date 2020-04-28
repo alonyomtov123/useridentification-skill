@@ -39,3 +39,5 @@ mycroft-pip install keras
 mycroft-pip install librosa
 
 mycroft-pip install PySimpleGUI
+
+sudo apt-get install python3-tk
