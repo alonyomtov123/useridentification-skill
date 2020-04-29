@@ -49,7 +49,8 @@ def getUserData(dbPath):
             conn.close()
     window.close()
     dest = "/opt/mycroft/skills/useridentification-skill/allUsers/" + str(number_of_entries + 1) + "-" + values[0] + "-1" + ".wav"
-    copyfile(getCurrentUserAnswer(), dest)
+    source = "/tmp/mycroft_utterances/" + getCurrentUserAnswer()
+    copyfile(source, dest)
 
 def getCurrentUserAnswer():
 	#get current question sound file	
