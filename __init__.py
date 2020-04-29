@@ -47,10 +47,13 @@ class Useridentification(MycroftSkill):
 					currentUser = row[0]
 			self.speak(currentUser)
 			currentUserAnswer = getCurrentUserAnswer()
-		
+			self.speak("voice matched")
+			self.speak(currentUser)
+
 			if (voiceMatched(currentUser, currentUserAnswer)):
 				return False
 			else:
+				self.speak("voice found")
 				if (voiceFound(currentUserAnswer)):
 					self.signIn("")
 					return False
@@ -101,7 +104,7 @@ class Useridentification(MycroftSkill):
 
 		#set current user in database
 		c.execute("UPDATE User SET CurrentUser = 0 WHERE CurrentUser = 1")
-		c.execute("UPDATE User SET CurrentUser = 1 WHERE ID = " + userId)
+		c.execute("UPDATE User SET CurrentUser = 1 WHERE ID = " + str(userId))
 		conn.commit()
 
 		settingsFile = open("/opt/mycroft/skills/useridentification-skill/settingFile.txt", "r")
@@ -126,7 +129,12 @@ class Useridentification(MycroftSkill):
 	def signUp(self):
 		audioFile = getCurrentUserAnswer()
 		getUserData('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
-		self.signIn(numOfUsers + 1)
+		
+		conn = sqlite3.connect('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
+		c = conn.cursor()		
+		c.execute("SELECT COUNT(*) FROM User")
+
+		self.signIn(c.fetchone()[0] + 1)
 
 
 def getCurrentUserAnswer():
@@ -136,7 +144,7 @@ def getCurrentUserAnswer():
 	for root, dirs, files in os.walk("/tmp/mycroft_utterances"):
 		for file in files:
 			allWaveFilePaths.append(file)
-	return sorted(allWaveFilePaths)[0]
+	return "/tmp/mycroft_utterances/" + sorted(allWaveFilePaths)[0]
 
 def create_skill():
 	return Useridentification()
