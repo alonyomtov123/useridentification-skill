@@ -30,9 +30,6 @@ class Useridentification(MycroftSkill):
 	#What to do when skill is triggered
 	@intent_file_handler('useridentification.intent')
 	def handle_useridentification(self, message):
-		#add files from questions
-		#explaining
-		#testing
 
 		#connect to database
 		conn = sqlite3.connect('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
@@ -48,8 +45,7 @@ class Useridentification(MycroftSkill):
 			self.speak(currentUser)
 			currentUserAnswer = getCurrentUserAnswer()
 			self.speak("voice matched")
-			self.speak(currentUser)
-
+			
 			if (voiceMatched(currentUser, currentUserAnswer)):
 				return False
 			else:
@@ -108,22 +104,24 @@ class Useridentification(MycroftSkill):
 		conn.commit()
 
 		settingsFile = open("/opt/mycroft/skills/useridentification-skill/settingFile.txt", "r")
-		for directory in settingsFile.readline():
+		for directory in settingsFile.readlines():
 			#find which file to change
-			currentSettingsFile = open(os.path.join(directory), "w")
-			for line in currentSettingsFile.readline():
-				if ("Username" in line or "username" in line):
-					nextLine = currentSettingsFile.readline()
-					if("value" in nextLine):
-						currentSettingsFile.write("\t\tvalue: " + username)
-				if ("Password" in line or "password" in line):
-					nextLine = currentSettingsFile.readline()
-					if("value" in nextLine):
-						currentSettingsFile.write("\t\tvalue: " + password)
+			
+			currentSettingsFile = open(os.path.join(directory.rstrip()), "r+")
+			allFileData = currentSettingsFile.readlines()
+			for line in range(len(allFileData)):
+				if ("Username" in allFileData[line] or "username" in allFileData[line] and "value" in allFileData[line + 1]):
+					allFileData[line + 1] = '          value: "' + username + '"\n'
+				if ("Password" in allFileData[line] or "password" in allFileData[line]  and "value" in allFileData[line + 1]):
+					allFileData[line + 1] = '          value: "' + password + '"\n'
+
+			currentSettingsFile.seek(0)
+			for line in allFileData:
+				currentSettingsFile.write(line)
 			currentSettingsFile.close()
 		settingsFile.close()
 		conn.close()
-
+		print("\n\n\n\n\n\nfinished signIn\n\n\n\n\n\n")
 
 
 	def signUp(self):
@@ -134,7 +132,7 @@ class Useridentification(MycroftSkill):
 		c = conn.cursor()		
 		c.execute("SELECT COUNT(*) FROM User")
 
-		self.signIn(c.fetchone()[0] + 1)
+		self.signIn(c.fetchone()[0])
 
 
 def getCurrentUserAnswer():
