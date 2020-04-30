@@ -2,12 +2,8 @@ import csv
 import sys
 import os
 
-sys.path.append("/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram")
-from scoring import get_id_result
-
 
 def voiceMatched(userId, wavFilePath):
-	#get files of user id
 	empty = True
 	lines = [["filename", "speaker"]]
 	for root, dirs, files in os.walk("/opt/mycroft/skills/useridentification-skill/allUsers"):
@@ -15,6 +11,7 @@ def voiceMatched(userId, wavFilePath):
 			if (userId in file.split('-')[0]):
 				lines.append([os.path.join(root, file), userId])
 				empty = False
+	
 	if (empty == False):
 		#add the path of the user to check
 		with open ('/opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/cfg/enroll_list.csv' , 'w') as writeFile:
@@ -29,7 +26,7 @@ def voiceMatched(userId, wavFilePath):
 		
 
 		#run the voice identification
-		get_id_result()
+		os.system("python3.7 /opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/scoring.py")
 
 		#get answers from results.csv
 		found = False
@@ -65,7 +62,7 @@ def voiceFound(wavFilePath):
 			writer.writerows(lines)
 
 		#run the voice identification
-		get_id_result()
+		os.system("python3.7 /opt/mycroft/skills/useridentification-skill/speakerIdentificationProgram/scoring.py")
 
 		#get answers from results.csv
 		found = False
