@@ -2,14 +2,19 @@ import PySimpleGUI as sg
 import sqlite3
 import os
 from shutil import copyfile
+import sounddevice as sd
+from scipy.io.wavfile import write
 
 def getUserData(dbPath):
     sg.theme('DarkAmber') #color
-    
+    fs = 44100
+    seconds = 5
+
     #window layout
     layout = [  [sg.Text('')],
                 [sg.Text('Enter Username: '), sg.InputText()],
                 [sg.Text('Enter Password:  '), sg.InputText()],
+                [sg.ReadButton('Record')],
                 [sg.Button('Ok')] ]
 
     # Create the Window
@@ -47,10 +52,16 @@ def getUserData(dbPath):
                 conn.commit()
                 break
             conn.close()
+
+            if event == 'Record':
+                sg.Popup("You have 5 seconds. Say your name and where you live")
+                myrecording = sd.rec(int(seconds * fs), samplerate=fs, channels=2)
+                sd.wait()  # Wait until recording is finished
+                dest = "/opt/mycroft/skills/useridentification-skill/allUsers/" + str(number_of_entries + 1) + "-" + values[0] + "-1" + ".wav"
+                write(dest, fs, myrecording)
     window.close()
-    dest = "/opt/mycroft/skills/useridentification-skill/allUsers/" + str(number_of_entries + 1) + "-" + values[0] + "-1" + ".wav"
-    source = "/tmp/mycroft_utterances/" + getCurrentUserAnswer()
-    copyfile(source, dest)
+    #source = "/tmp/mycroft_utterances/" + getCurrentUserAnswer()
+    #copyfile(source, dest)
 
 def getCurrentUserAnswer():
 	#get current question sound file	
