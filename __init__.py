@@ -1,92 +1,92 @@
-from mycroft import MycroftSkill, intent_file_handler
-import os
-from shutil import copyfile
+from mycroft import MycroftSkill, intent_handler
 import os
 import sqlite3
 import sys
 
 sys.path.append("/opt/mycroft/skills/useridentification-skill")
-from sqlGui import getUserData
-from voiceRecognition import voiceFound, voiceMatched
+from .sqlGui import getUserData
+from .voiceRecognition import voiceFound, voiceMatched
 
 
 
 class Useridentification(MycroftSkill):
-	def __init__(self):
-	        MycroftSkill.__init__(self)
-	
-	def converse(self, utterances):
+	def initialize(self):
+		self.db_path = self.root_dir + '/allUsers/Users.db'
+		# self.current_user = None
+
+	def converse(self, utterances, lang=None):
 		utt = utterances[0]
-		if self.voc_match(utt, 'useridentification.intent'):
-		# mock the standard message object to pass it to a standard intent handler
+		is_authenticated = False
+		if self.voc_match(utt, 'useridentification'):
+			# mock the standard message object to pass it to a standard intent handler
 			mock_message = {'data': {'utterance': utt}}
-			if(self.handle_useridentification(mock_message) == False):
-				return False
-			return True
-		return False
-		
+
+			is_authenticated = self.handle_identify_user(mock_message)
+		else:
+			return False
+		self.log.info("is_authenticated: {}".format(is_authenticated))
+		# If authenticated return False to continue processing utterance
+		# Else return True to prevent further handling of utterance
+		block_utterance = not is_authenticated
+		return block_utterance
 
 
 	#What to do when skill is triggered
-	@intent_file_handler('useridentification.intent')
-	def handle_useridentification(self, message):
+	# @intent_handler('useridentification.intent')
+	def handle_identify_user(self, message):
+		self.log.info("AUTHENTICATING")
+		is_authenticated = True
+		return is_authenticated
 
 		#connect to database
-		conn = sqlite3.connect('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
-		c = conn.cursor()		
+		conn = sqlite3.connect(self.db_path)
+		c = conn.cursor()
 		c.execute("SELECT * FROM User")
 
-		if not (c.fetchone() == None):
+		if c.fetchone() == None:
+			self.speak_dialog('no.registered.users')
+			is_authenticated = self.prompt_for_registration()
+		else:
 			currentUser = ""
 			for row in c.execute("SELECT * FROM User"):
 				self.speak(row[0])
-				if (row[3] == '1'):
+				if row[3] == '1':
 					currentUser = row[0]
 			self.speak(currentUser)
 			currentUserAnswer = getCurrentUserAnswer()
-			
-			if (voiceMatched(currentUser, currentUserAnswer)):
-				return False
+
+			if voiceMatched(currentUser, currentUserAnswer):
+				is_authenticated = True
+			elif voiceFound(currentUserAnswer):
+				self.signIn()
+				is_authenticated = True
 			else:
-				if (voiceFound(currentUserAnswer)):
-					self.signIn("")
-					return False
-				else:
-					answer = self.ask_yesno("Do you want to sign up?")
-					if (answer == "yes"):
-						self.signUp()
-						return False
-					elif (answer == "no"):
-						return True
-					else:
-						self.speak(answer)
-						self.speak("Answer is invalid")
-						return True
-		else:
-			self.speak("No user is currently registered")
-			answer = self.get_response("Do you want to sign up?")
-			if (answer == "yes"):
-				self.signUp()
-				return False
-			elif (answer == "no"):
-				self.speak("Goodbye")
-				return True
-			else:
-				print(answer + "\n\n\n\n\n")
-				self.speak("Answer is invalid.")
-				return True
+				is_authenticated = self.prompt_for_registration()
+
 		conn.close()
+		return is_authenticated
 
 
+	def prompt_for_registration(self):
+		registered = False
+		answer = self.ask_yesno('signup.request')
+		if (answer == "yes"):
+			registered = self.signUp()
+		elif (answer == "no"):
+			self.speak_dialog('signup.declined')
+		else:
+			self.speak_dialog('invalid.response', {'answer': answer})
+		return registered
 
-	def signIn(self, userId):
-		conn = sqlite3.connect('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
-		c = conn.cursor()	
-		if(userId == ""):
+
+	def signIn(self, userId=None):
+		conn = sqlite3.connect(self.db_path)
+		c = conn.cursor()
+		if userId is None:
 			c.execute("SELECT * FROM User")
-			if not (c.fetchone() == None):
+			if c.fetchone() != None:
 				for row in c.execute("SELECT * FROM User"):
-					if (voiceMatched(row[1], getCurrentUserAnswer())):
+					if voiceMatched(row[1], getCurrentUserAnswer()):
 						userId = row[0]
 						username = row[1]
 						password = row[2]
@@ -100,58 +100,28 @@ class Useridentification(MycroftSkill):
 		c.execute("UPDATE User SET CurrentUser = 0 WHERE CurrentUser = 1")
 		c.execute("UPDATE User SET CurrentUser = 1 WHERE ID = " + str(userId))
 		conn.commit()
-
-		#settingsFile = open("/opt/mycroft/skills/useridentification-skill/settingFile.txt", "r")
-		#for directory in settingsFile.readlines():
-			#find which file to change
-			
-		#	currentSettingsFile = open(os.path.join(directory.rstrip()), "r+")
-		#	allFileData = currentSettingsFile.readlines()
-		#	for line in range(len(allFileData)):
-		#		if ("Username" in allFileData[line] or "username" in allFileData[line] and "value" in allFileData[line + 1]):
-		#			allFileData[line + 1] = '          value: "' + username + '"\n'
-		#		if ("Password" in allFileData[line] or "password" in allFileData[line]  and "value" in allFileData[line + 1]):
-		#			allFileData[line + 1] = '          value: "' + password + '"\n'
-
-		#	currentSettingsFile.seek(0)
-		#	for line in allFileData:
-		#		currentSettingsFile.write(line)
-		#	currentSettingsFile.close()
-		#settingsFile.close()
-		
-		
-	#	settingsFile = open("/opt/mycroft/skills/useridentification-skill/settingFile.txt", "r")
-	#	for directory in settingsFile.readlines():
-			#find which file to change
-	#		currentSettingsFile = open("~/.mycroft/" + directory.rstrip(), "r+")
-	#		allFileData = currentSettingsFile.readlines()
-	#		for line in range(len(allFileData)):
-	#			if ("username" in allFileData[line]):
-	#				allFileData[line] = 'username: "' + username + '"\n'
-	#			if ("password" in allFileData[line]):
-		#			allFileData[line] = 'password: "' + password + '"\n'
-			#currentSettingsFile.seek(0)
-			#for line in allFileData:
-			#	currentSettingsFile.write(line)	
-
 		conn.close()
 
 
 	def signUp(self):
-		audioFile = getCurrentUserAnswer()
-		getUserData('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
-		
-		conn = sqlite3.connect('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
-		c = conn.cursor()		
-		c.execute("SELECT COUNT(*) FROM User")
+		try:
+			audioFile = getCurrentUserAnswer()
+			getUserData(self.db_path)
 
-		self.signIn(c.fetchone()[0])
+			conn = sqlite3.connect(self.db_path)
+			c = conn.cursor()
+			c.execute("SELECT COUNT(*) FROM User")
+
+			self.signIn(c.fetchone()[0])
+			return True
+		except Exception:
+			return False
 
 
 def getCurrentUserAnswer():
-	#get current question sound file	
+	#get current question sound file
 	#/tmp/mycroft_utterance(timestamp).wav
-	allWaveFilePaths = []	
+	allWaveFilePaths = []
 	for root, dirs, files in os.walk("/tmp/mycroft_utterances"):
 		for file in files:
 			allWaveFilePaths.append(file)
