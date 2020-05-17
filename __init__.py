@@ -30,7 +30,6 @@ class Useridentification(MycroftSkill):
 	#What to do when skill is triggered
 	@intent_file_handler('useridentification.intent')
 	def handle_useridentification(self, message):
-
 		#connect to database
 		conn = sqlite3.connect('/opt/mycroft/skills/useridentification-skill/allUsers/Users.db')
 		c = conn.cursor()		
