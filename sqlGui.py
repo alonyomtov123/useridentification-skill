@@ -26,8 +26,8 @@ def getUserData(dbPath):
             number_of_entries = c.fetchone()[0]
             if number_of_entries != 0:
                 c = conn.cursor()
-                c.execute("SELECT userId FROM User WHERE userId=" + values[0])
-                if not c.fetchall():
+                c.execute('SELECT Username FROM User WHERE Username="' + values[0] + '"')
+                if c.fetchall():
                     sg.Popup('Username is already used')
                 else:
                     c = conn.cursor()
@@ -42,7 +42,8 @@ def getUserData(dbPath):
             conn.close()
     window.close()
     dest = "/opt/mycroft/skills/useridentification-skill/allUsers/" + str(number_of_entries + 1) + "-" + values[0] + "-1" + ".wav"
-    copyfile(getCurrentUserAnswer(), dest)
+
+    copyfile("/tmp/mycroft_utterances/" + getCurrentUserAnswer(), dest)
 
 def getCurrentUserAnswer():
 	#get current question sound file	
@@ -52,3 +53,4 @@ def getCurrentUserAnswer():
 		for file in files:
 			allWaveFilePaths.append(file)
 	return sorted(allWaveFilePaths)[0]
+
